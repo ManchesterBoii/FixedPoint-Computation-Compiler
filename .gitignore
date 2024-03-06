@@ -4,6 +4,7 @@
 # Compiled Object files
 *.slo
 *.lo
+obj
 *.o
 *.obj
 
@@ -30,3 +31,9 @@
 *.exe
 *.out
 *.app
+
+# IDE
+.vscode
+
+# binaries
+bin
