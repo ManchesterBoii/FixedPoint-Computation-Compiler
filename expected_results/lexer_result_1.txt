@@ -1,0 +1,53 @@
+def
+id a
+in
+(
+[
+num 1
+,
+num 4
+]
+,
+num 0.1
+)
+=
+num 4
+def
+id b
+in
+(
+[
+num 3
+,
+num 5
+]
+,
+num 1
+)
+=
+num 7
+def
+id c
+in
+(
+[
+num 4
+,
+num 255
+]
+,
+num 0.01
+)
+=
+num 4.01
+def
+id z
+=
+(
+id a
++
+id b
+)
+*
+id c
+EOF
