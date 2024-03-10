@@ -1,5 +1,7 @@
 #include <string>
 
+using namespace std;
+
 enum Token {
     tok_eof = -1,
 
@@ -12,7 +14,7 @@ enum Token {
     tok_number = -5
 };
 
-extern std::string IdentifierStr;
+extern string IdentifierStr;
 extern double NumVal;
 
 int gettok();
