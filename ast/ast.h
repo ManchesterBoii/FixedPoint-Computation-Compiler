@@ -7,37 +7,47 @@ class AST {
 public: 
     virtual ~AST() = default;
     virtual void print(int depth = 0) = 0;
+
+    // virtual Value *codegen(Function* F) = 0;
 };
 
-class Expr: public AST {
-public: 
-    virtual ~Expr() = default;
-};
+// class Expr: public AST {
+// public: 
+//     virtual ~Expr() = default;
 
-class NumExpr : public Expr {
+//     virtual Value *codegen() = 0;
+// };
+
+class NumExpr : public AST {
 public:
     double value;
     NumExpr(double value);
 
     void print(int depth = 0) override;
+
+    // Value *codegen(Function* F) override;
 };
 
-class NameExpr: public Expr {
+class NameExpr: public AST {
 public:
     std::string name;
     NameExpr(const std::string& name);
 
     void print(int depth = 0) override;
+
+    // Value *codegen(Function* F) override;
 };
 
-class BinOpExpr : public Expr {
+class BinOpExpr : public AST {
 public:
-    std::unique_ptr<Expr> left;
-    std::unique_ptr<Expr> right;
+    std::unique_ptr<AST> left;
+    std::unique_ptr<AST> right;
     char op; 
-    BinOpExpr(std::unique_ptr<Expr> lhs, std::unique_ptr<Expr> rhs, char o);
+    BinOpExpr(std::unique_ptr<AST> lhs, std::unique_ptr<AST> rhs, char o);
 
     void print(int depth = 0) override;
+
+    // Value *codegen(Function* F) override;
 };
 
 class FPnt {
@@ -48,17 +58,22 @@ public:
     FPnt(double lb, double ub, double prec);
 
     void print(int depth = 0);
+
+    // Function *codegen(Function* F);
 };
 
 class Definition : public AST {
 public:
     std::string name;
     std::unique_ptr<FPnt> floatingPointNotation; 
-    std::unique_ptr<Expr> expression;
-    Definition(const std::string& n, std::unique_ptr<FPnt> fpnt, std::unique_ptr<Expr> expr);
-    Definition(const std::string& n, std::unique_ptr<Expr> expr);
+    std::unique_ptr<AST> expression;
+    Definition(const std::string& n, std::unique_ptr<FPnt> fpnt, std::unique_ptr<AST> expr);
+    Definition(const std::string& n, std::unique_ptr<AST> expr);
 
     void print(int depth = 0) override;
+
+    // Value *codegen(Function* F) override;
+
 };
 
 class ProgramAST : public AST {
@@ -66,5 +81,8 @@ public:
     std::vector<std::unique_ptr<Definition>> Stmts;
 
     void print(int depth = 0) override;
+
+    // Value *codegen(Function* F) override;
+
 };
 

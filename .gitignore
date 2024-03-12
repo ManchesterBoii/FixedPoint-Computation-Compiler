@@ -41,3 +41,4 @@ bin
 llvm-project
 
 *.testabi
+toy

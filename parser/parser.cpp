@@ -86,7 +86,7 @@ std::unique_ptr<FPnt> Parser::ParseFloatingPointNotation() {
 }
 
 
-std::unique_ptr<Expr> Parser::ParseExpression() {
+std::unique_ptr<AST> Parser::ParseExpression() {
     auto left = ParseTerm();
     while (CurrentToken == '+' || CurrentToken == '-') {
         char op = CurrentToken;
@@ -97,7 +97,7 @@ std::unique_ptr<Expr> Parser::ParseExpression() {
     return left;
 }
 
-std::unique_ptr<Expr> Parser::ParseTerm() {
+std::unique_ptr<AST> Parser::ParseTerm() {
     auto left = ParseFactor();
     while (CurrentToken == '*' || CurrentToken == '/') {
         char op = CurrentToken;
@@ -108,7 +108,7 @@ std::unique_ptr<Expr> Parser::ParseTerm() {
     return left;
 }
 
-std::unique_ptr<Expr> Parser::ParseFactor() {
+std::unique_ptr<AST> Parser::ParseFactor() {
     if (CurrentToken == tok_number) {
         auto result = std::make_unique<NumExpr>(NumVal);
         NextToken(); // consume the number
