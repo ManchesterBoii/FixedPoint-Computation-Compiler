@@ -1,14 +1,38 @@
+#include "llvm/ADT/APFloat.h"
+#include "llvm/ADT/STLExtras.h"
+#include "llvm/IR/BasicBlock.h"
+#include "llvm/IR/Constants.h"
+#include "llvm/IR/DerivedTypes.h"
+#include "llvm/IR/Function.h"
+#include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/Module.h"
+#include "llvm/IR/Type.h"
+#include "llvm/IR/Verifier.h"
+#include "llvm/Support/FileSystem.h"
+#include "llvm/Support/Host.h"
+#include "llvm/Support/raw_ostream.h"
+#include "llvm/TargetParser/Host.h"
+#include "llvm/Target/TargetMachine.h"
+#include "llvm/Target/TargetOptions.h"
+#include "llvm/Transforms/Scalar.h"
+#include "llvm/Transforms/Utils/SimplifyLibCalls.h"
+#include "llvm/Transforms/Scalar/GVN.h"
+
 #include <string>
 #include <vector>
 #include <memory>
 #include <iostream>
+
+using namespace llvm;
+
 
 class AST {
 public: 
     virtual ~AST() = default;
     virtual void print(int depth = 0) = 0;
 
-    // virtual Value *codegen(Function* F) = 0;
+    virtual Value *codegen(Function* F) = 0;
 };
 
 // class Expr: public AST {
@@ -25,7 +49,7 @@ public:
 
     void print(int depth = 0) override;
 
-    // Value *codegen(Function* F) override;
+    Value *codegen(Function* F) override;
 };
 
 class NameExpr: public AST {
@@ -35,7 +59,7 @@ public:
 
     void print(int depth = 0) override;
 
-    // Value *codegen(Function* F) override;
+    Value *codegen(Function* F) override;
 };
 
 class BinOpExpr : public AST {
@@ -47,7 +71,7 @@ public:
 
     void print(int depth = 0) override;
 
-    // Value *codegen(Function* F) override;
+    Value *codegen(Function* F) override;
 };
 
 class FPnt {
@@ -59,7 +83,7 @@ public:
 
     void print(int depth = 0);
 
-    // Function *codegen(Function* F);
+    Function *codegen(Function* F);
 };
 
 class Definition : public AST {
@@ -72,7 +96,7 @@ public:
 
     void print(int depth = 0) override;
 
-    // Value *codegen(Function* F) override;
+    Value *codegen(Function* F) override;
 
 };
 
@@ -82,7 +106,7 @@ public:
 
     void print(int depth = 0) override;
 
-    // Value *codegen(Function* F) override;
+    Value *codegen(Function* F) override;
 
 };
 
