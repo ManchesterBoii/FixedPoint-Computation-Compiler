@@ -46,6 +46,8 @@ public:
     double upperBound;
     double precision;
     FPnt(double lb, double ub, double prec);
+
+    void print(int depth = 0);
 };
 
 class Definition : public AST {

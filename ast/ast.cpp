@@ -38,6 +38,10 @@ void BinOpExpr::print(int depth) {
 void Definition::print(int depth) {
     std::string indent(depth * 4, ' ');
     std::cout << indent << "Definition(" << name << ",\n";
+    if (floatingPointNotation) {
+        floatingPointNotation->print(depth + 1);
+        std::cout << ",\n";
+    }
     expression->print(depth + 1);
     std::cout << "\n" << indent << ")";
 }
@@ -53,4 +57,9 @@ void ProgramAST::print(int depth) {
         std::cout << "\n";
     }
     std::cout << indent << ")" << std::endl;
+}
+
+void FPnt::print(int depth) {
+    std::string indent(depth * 4, ' ');
+    std::cout << indent << "([" << lowerBound << ", " << upperBound << "], " << precision << ")";
 }
