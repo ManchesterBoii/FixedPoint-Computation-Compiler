@@ -39,3 +39,5 @@ obj
 bin
 
 llvm-project
+
+*.testabi
