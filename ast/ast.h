@@ -9,15 +9,10 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Type.h"
 #include "llvm/IR/Verifier.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Host.h"
-#include "llvm/Support/raw_ostream.h"
-#include "llvm/TargetParser/Host.h"
-#include "llvm/Target/TargetMachine.h"
-#include "llvm/Target/TargetOptions.h"
-#include "llvm/Transforms/Scalar.h"
-#include "llvm/Transforms/Utils/SimplifyLibCalls.h"
-#include "llvm/Transforms/Scalar/GVN.h"
+#include <algorithm>
+#include <cctype>
+#include <cstdio>
+#include <cstdlib>
 
 #include <string>
 #include <vector>
@@ -26,6 +21,10 @@
 
 using namespace llvm;
 
+static std::unique_ptr<LLVMContext> TheContext;
+static std::unique_ptr<Module> TheModule;
+static std::unique_ptr<IRBuilder<>> Builder;
+static std::map<std::string, Value *> NamedValues;
 
 class AST {
 public: 
@@ -83,7 +82,7 @@ public:
 
     void print(int depth = 0);
 
-    Function *codegen(Function* F);
+    //Function *codegen(Function* F);
 };
 
 class Definition : public AST {

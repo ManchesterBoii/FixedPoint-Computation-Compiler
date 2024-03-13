@@ -63,3 +63,58 @@ void FPnt::print(int depth) {
     std::string indent(depth * 4, ' ');
     std::cout << indent << "([" << lowerBound << ", " << upperBound << "], " << precision << ")";
 }
+
+
+Value *BinOpExpr::codegen(Function* F) {
+    Value *L = left->codegen(F);
+    Value *R = right->codegen(F);
+    if (!L || !R)
+        return nullptr;
+
+    switch (op) {
+    case '+':
+        return nullptr; // TODO
+    case '-':
+        return nullptr; // TODO
+    case '*':
+        return nullptr; // TODO
+    default:
+        return LogErrorV("invalid binary operator");
+    }
+
+    // need to handle FPnt
+}
+
+Value *ProgramAST::codegen(Function* F) {
+
+  for (auto &iter: this->Stmts){
+    iter->codegen(F);
+  }
+
+  return nullptr;
+}
+
+
+Value *Definition::codegen(Function* F) {
+    Value *Val = expression->codegen(F);
+
+    NamedValues[name] = Val;
+    
+
+    // TODO: handle PFnt
+
+    return nullptr
+}
+
+
+Value *NameExpr::codegen() {
+    
+  Value *V = NamedValues[name];
+  if (!V)
+    return LogErrorV("Unknown variable name");
+  return V;
+}
+
+Value *NumberExprAST::codegen() {
+  return ConstantFP::get(*TheContext, APFloat(Val)); // might need to modify this. 
+}
