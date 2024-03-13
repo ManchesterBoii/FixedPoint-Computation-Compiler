@@ -13,7 +13,7 @@
 #include <cctype>
 #include <cstdio>
 #include <cstdlib>
-
+#include <map>
 #include <string>
 #include <vector>
 #include <memory>
@@ -25,6 +25,7 @@ static std::unique_ptr<LLVMContext> TheContext;
 static std::unique_ptr<Module> TheModule;
 static std::unique_ptr<IRBuilder<>> Builder;
 static std::map<std::string, Value *> NamedValues;
+
 
 class AST {
 public: 
@@ -109,3 +110,4 @@ public:
 
 };
 
+std::unique_ptr<AST> LogError(const char *Str);

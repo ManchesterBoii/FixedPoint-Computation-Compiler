@@ -1,5 +1,10 @@
 #include "ast.h"
 
+std::unique_ptr<AST> LogError(const char *Str) {
+  fprintf(stderr, "Error: %s\n", Str);
+  return nullptr;
+}
+
 NumExpr::NumExpr(double value) : value(value) {}
 
 NameExpr::NameExpr(const std::string& name) : name(name) {}
@@ -79,7 +84,8 @@ Value *BinOpExpr::codegen(Function* F) {
     case '*':
         return nullptr; // TODO
     default:
-        return LogErrorV("invalid binary operator");
+        LogError("Unknown variable name");
+        return nullptr;
     }
 
     // need to handle FPnt
@@ -103,18 +109,21 @@ Value *Definition::codegen(Function* F) {
 
     // TODO: handle PFnt
 
-    return nullptr
+    return nullptr;
 }
 
 
-Value *NameExpr::codegen() {
+Value *NameExpr::codegen(Function* F) {
     
   Value *V = NamedValues[name];
-  if (!V)
-    return LogErrorV("Unknown variable name");
+  if (!V){
+    LogError("Unknown variable name");
+    return nullptr;
+  }
+    
   return V;
 }
 
-Value *NumberExprAST::codegen() {
-  return ConstantFP::get(*TheContext, APFloat(Val)); // might need to modify this. 
+Value *NumExpr::codegen(Function* F) {
+  return ConstantFP::get(*TheContext, APFloat(value)); // might need to modify this. 
 }
