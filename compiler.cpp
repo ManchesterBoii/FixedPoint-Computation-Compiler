@@ -42,19 +42,21 @@ int main() {
 
     InitializeModule();
 
-    std::vector<Type *> Args(0, Type::getDoubleTy(*TheContext));
-    FunctionType *FT = FunctionType::get(Type::getVoidTy(*TheContext), Args, false);
-
+    FunctionType *FT = FunctionType::get(Type::getVoidTy(*TheContext), false);
     Function *F = Function::Create(FT, Function::ExternalLinkage, "__anon_expr", TheModule.get());
-    BasicBlock::Create(*TheContext, "entry", F);
-    Builder->SetInsertPoint(&(F->getEntryBlock()));
+    BasicBlock *BB = BasicBlock::Create(*TheContext, "entry", F);
+    Builder->SetInsertPoint(BB);
+
+    Builder->CreateAdd(ConstantInt::get(Type::getInt32Ty(*TheContext), 1), 
+                       ConstantInt::get(Type::getInt32Ty(*TheContext), 2));
 
     program->codegen(F);
-    llvm::outs() << *F << "\n";
 
-    Builder->CreateRet(nullptr);
+    Builder->CreateRet(nullptr);  // Ensure the function is complete before printing
 
-    TheModule->print(errs(), nullptr);
+    //llvm::outs() << *F << "\n";   // Print the function
+
+    TheModule->print(errs(), nullptr);  // Print the whole module
 
     return 0;
 }
