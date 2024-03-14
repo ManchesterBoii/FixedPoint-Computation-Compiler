@@ -1,4 +1,4 @@
-#includ "../utils/utils.h"
+#include "../utils/utils.cpp"
 #include "ast.h"
 
 std::map<std::string, std::unique_ptr<FPnt>>& GetIntervalTable() {
@@ -221,7 +221,6 @@ Value *NameExpr::codegen(Function* F) {
 
 llvm::Value* NumExpr::codegen(llvm::Function* F) {
     auto& context = F->getContext();
-    auto& builder = *Builder; 
 
     int bitWidth = calcNumBits(floatingPointNotation->lowerBound, floatingPointNotation->upperBound, floatingPointNotation->decimalBits);
 
