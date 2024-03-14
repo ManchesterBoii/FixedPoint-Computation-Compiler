@@ -8,7 +8,7 @@ num 1
 num 4
 ]
 ,
-num 0.1
+num 2
 )
 =
 num 4
@@ -19,13 +19,13 @@ in
 [
 num 3
 ,
-num 5
+num 7
 ]
 ,
-num 1
+num 4
 )
 =
-num 7
+num 6
 def
 id c
 in
@@ -36,7 +36,7 @@ num 4
 num 255
 ]
 ,
-num 0.01
+num 4
 )
 =
 num 4.01
@@ -50,4 +50,6 @@ id b
 )
 *
 id c
++
+num 1
 EOF
