@@ -167,13 +167,22 @@ Value *BinOpExpr::codegen(Function* F) {
     if (!L || !R)
         return nullptr;
 
+    int resultBitWidth = calcNumBits(
+        floatingPointNotation->lowerBound, 
+        floatingPointNotation->upperBound, 
+        floatingPointNotation->decimalBits);
+    Type *resultType = IntegerType::get(*TheContext, resultBitWidth);
+
+
+    // signed extension to result type of binary expression
+    L = Builder->CreateSExtOrTrunc(L, resultType);
+    R = Builder->CreateSExtOrTrunc(R, resultType);
+
     switch (op) {
     case '+':
-        return nullptr; // TODO
-    case '-':
-        return nullptr; // TODO
+        return Builder->CreateAdd(L, R);
     case '*':
-        return nullptr; // TODO
+        return Builder->CreateMul(L, R);
     default:
         LogError("Unknown variable name");
         return nullptr;
@@ -183,43 +192,32 @@ Value *BinOpExpr::codegen(Function* F) {
 }
 
 Value *ProgramAST::codegen(Function* F) {
-
-  for (auto &iter: this->Stmts){
-    iter->codegen(F);
-  }
-
-  return nullptr;
+    Value *stmtRes;
+    for (auto &Stmt : Stmts) {
+        stmtRes = Stmt->codegen(F);
+    }
+    return stmtRes;
 }
 
 
 Value *Definition::codegen(Function* F) {
     Value *Val = expression->codegen(F);
-
     NamedValues[name] = Val;
-    
-
-    // TODO: handle PFnt
-
-    return nullptr;
+    // TODO handle FPnt
+    return Val;
 }
 
 
 Value *NameExpr::codegen(Function* F) {
-    
-  Value *V = NamedValues[name];
-  if (!V){
-    LogError("Unknown variable name");
-    return nullptr;
-  }
-    
-  return V;
+    Value *Val = NamedValues[name];
+    if (!Val){
+        LogError("Unknown variable name");
+        return nullptr;
+    }
+    return Val;
 }
 
-// Value *NumExpr::codegen(Function* F) {
-//   return ConstantFP::get(*TheContext, APFloat(value)); // might need to modify this. 
-// }
-
-llvm::Value* NumExpr::codegen(llvm::Function* F) {
+Value* NumExpr::codegen(llvm::Function* F) {
     auto& context = F->getContext();
 
     int bitWidth = calcNumBits(floatingPointNotation->lowerBound, floatingPointNotation->upperBound, floatingPointNotation->decimalBits);

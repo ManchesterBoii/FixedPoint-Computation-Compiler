@@ -37,12 +37,22 @@ static void InitializeModule() {
 
 int main() {
     Parser parser;
-    std::unique_ptr<ProgramAST> ast = parser.ParseProgram();
-    ast->print();
+    std::unique_ptr<ProgramAST> program = parser.ParseProgram();
+    // program->print();
 
     InitializeModule();
 
-    // call codegen
+    std::vector<Type *> Args(0, Type::getDoubleTy(*TheContext));
+    FunctionType *FT = FunctionType::get(Type::getVoidTy(*TheContext), Args, false);
+
+    Function *F = Function::Create(FT, Function::ExternalLinkage, "__anon_expr", TheModule.get());
+    BasicBlock::Create(*TheContext, "entry", F);
+    Builder->SetInsertPoint(&(F->getEntryBlock()));
+
+    program->codegen(F);
+    llvm::outs() << *F << "\n";
+
+    Builder->CreateRet(nullptr);
 
     TheModule->print(errs(), nullptr);
 
