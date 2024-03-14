@@ -18,6 +18,11 @@
 #include <vector>
 #include <memory>
 #include <iostream>
+#include <map>
+
+class FPnt;
+
+std::map<std::string, std::unique_ptr<FPnt>>& GetIntervalTable();
 
 using namespace llvm;
 
@@ -31,6 +36,8 @@ class AST {
 public: 
     virtual ~AST() = default;
     virtual void print(int depth = 0) = 0;
+
+    virtual std::unique_ptr<FPnt> propagateIntervals() = 0;
 
     virtual Value *codegen(Function* F) = 0;
 };
@@ -47,6 +54,7 @@ public:
     double value;
     NumExpr(double value);
 
+    std::unique_ptr<FPnt> propagateIntervals() override;
     void print(int depth = 0) override;
 
     Value *codegen(Function* F) override;
@@ -57,6 +65,7 @@ public:
     std::string name;
     NameExpr(const std::string& name);
 
+    std::unique_ptr<FPnt> propagateIntervals() override;
     void print(int depth = 0) override;
 
     Value *codegen(Function* F) override;
@@ -69,6 +78,7 @@ public:
     char op; 
     BinOpExpr(std::unique_ptr<AST> lhs, std::unique_ptr<AST> rhs, char o);
 
+    std::unique_ptr<FPnt> propagateIntervals() override;
     void print(int depth = 0) override;
 
     Value *codegen(Function* F) override;
@@ -94,6 +104,8 @@ public:
     Definition(const std::string& n, std::unique_ptr<FPnt> fpnt, std::unique_ptr<AST> expr);
     Definition(const std::string& n, std::unique_ptr<AST> expr);
 
+    std::unique_ptr<FPnt> propagateIntervals() override;
+
     void print(int depth = 0) override;
 
     Value *codegen(Function* F) override;
@@ -103,6 +115,8 @@ public:
 class ProgramAST : public AST {
 public:
     std::vector<std::unique_ptr<Definition>> Stmts;
+
+    std::unique_ptr<FPnt> propagateIntervals() override;
 
     void print(int depth = 0) override;
 
