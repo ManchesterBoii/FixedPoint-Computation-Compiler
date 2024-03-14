@@ -1,5 +1,4 @@
-#include <algorithm>
-
+#includ "../utils/utils.h"
 #include "ast.h"
 
 std::map<std::string, std::unique_ptr<FPnt>>& GetIntervalTable() {
@@ -216,6 +215,39 @@ Value *NameExpr::codegen(Function* F) {
   return V;
 }
 
-Value *NumExpr::codegen(Function* F) {
-  return ConstantFP::get(*TheContext, APFloat(value)); // might need to modify this. 
+// Value *NumExpr::codegen(Function* F) {
+//   return ConstantFP::get(*TheContext, APFloat(value)); // might need to modify this. 
+// }
+
+llvm::Value* NumExpr::codegen(llvm::Function* F) {
+    auto& context = F->getContext();
+    auto& builder = *Builder; 
+
+    int bitWidth = calcNumBits(floatingPointNotation->lowerBound, floatingPointNotation->upperBound, floatingPointNotation->decimalBits);
+
+    // Select the LLVM integer type based on the calculated bit width
+    llvm::Type* intType;
+    switch (bitWidth) {
+        case 8:
+            intType = llvm::Type::getInt8Ty(context);
+            break;
+        case 16:
+            intType = llvm::Type::getInt16Ty(context);
+            break;
+        case 32:
+            intType = llvm::Type::getInt32Ty(context);
+            break;
+        case 64:
+            intType = llvm::Type::getInt64Ty(context);
+            break;
+        default:
+            throw std::runtime_error("Unsupported bit width");
+    }
+
+    uint64_t scaledValue = static_cast<uint64_t>(value * std::pow(2, floatingPointNotation->decimalBits));
+
+
+    llvm::Constant* constVal = llvm::ConstantInt::get(intType, scaledValue);
+
+    return constVal;
 }
