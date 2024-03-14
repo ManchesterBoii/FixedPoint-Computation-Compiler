@@ -177,12 +177,19 @@ Value *BinOpExpr::codegen(Function* F) {
     // signed extension to result type of binary expression
     L = Builder->CreateSExtOrTrunc(L, resultType);
     R = Builder->CreateSExtOrTrunc(R, resultType);
+    L->print(errs());
+    R->print(errs());
+    Value* res;
 
     switch (op) {
     case '+':
-        return Builder->CreateAdd(L, R);
+        res = Builder->CreateAdd(L, R);
+        res->print(errs());
+        return res;
     case '*':
-        return Builder->CreateMul(L, R);
+        res = Builder->CreateMul(L, R);
+        res->print(errs());
+        return res;
     default:
         LogError("Unknown variable name");
         return nullptr;
@@ -191,10 +198,12 @@ Value *BinOpExpr::codegen(Function* F) {
     // need to handle FPnt
 }
 
+
 Value *ProgramAST::codegen(Function* F) {
     Value *stmtRes;
     for (auto &Stmt : Stmts) {
         stmtRes = Stmt->codegen(F);
+        stmtRes->print(errs());
     }
     return stmtRes;
 }
@@ -203,6 +212,8 @@ Value *ProgramAST::codegen(Function* F) {
 Value *Definition::codegen(Function* F) {
     Value *Val = expression->codegen(F);
     NamedValues[name] = Val;
+
+    Val->print(errs());
     // TODO handle FPnt
     return Val;
 }
@@ -214,6 +225,7 @@ Value *NameExpr::codegen(Function* F) {
         LogError("Unknown variable name");
         return nullptr;
     }
+    Val->print(errs());
     return Val;
 }
 
@@ -223,7 +235,8 @@ Value* NumExpr::codegen(llvm::Function* F) {
     int bitWidth = calcNumBits(floatingPointNotation->lowerBound, floatingPointNotation->upperBound, floatingPointNotation->decimalBits);
 
     // Select the LLVM integer type based on the calculated bit width
-    llvm::Type* intType;
+    llvm::Type* intType ;
+    std::cout << intType << "\n";
     switch (bitWidth) {
         case 8:
             intType = llvm::Type::getInt8Ty(context);
@@ -242,10 +255,11 @@ Value* NumExpr::codegen(llvm::Function* F) {
     }
 
     // might need change later
-    uint64_t scaledValue = static_cast<uint64_t>(value * std::pow(2, floatingPointNotation->decimalBits));
-
+    uint64_t scaledValue = static_cast<uint64_t>(static_cast<uint64_t>(value) << static_cast<uint64_t>(floatingPointNotation->decimalBits));
+    std::cout << scaledValue <<"\n";
 
     llvm::Constant* constVal = llvm::ConstantInt::get(intType, scaledValue);
+    constVal->print(errs());
 
     return constVal;
 }
