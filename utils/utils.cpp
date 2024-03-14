@@ -4,7 +4,7 @@ int calcNumBits(double lowerBound, double upperBound, int decimalBits) {
     double maxAbsValue = std::max(std::abs(lowerBound), std::abs(upperBound));
     int bits = std::ceil(std::log2(maxAbsValue + 1)); 
 
-    int signBit = (lowerBound < 0) ? 1 : 0;
+    int signBit = 1;
 
     int totalBits = bits + signBit + decimalBits;
 

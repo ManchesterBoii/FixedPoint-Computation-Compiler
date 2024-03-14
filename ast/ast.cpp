@@ -186,12 +186,12 @@ Value *BinOpExpr::codegen(Function* F) {
     case '+':
         res = Builder->CreateAdd(L, R);
         res->print(errs());
-        std::cout << "add" << std::endl;
+        std::cout << " add " << std::endl;
         return res;
     case '*':
         res = Builder->CreateMul(L, R);
         res->print(errs());
-        std::cout << "mult" << std::endl;
+        std::cout << " mult " << std::endl;
         return res;
     default:
         LogError("Unknown variable name");
