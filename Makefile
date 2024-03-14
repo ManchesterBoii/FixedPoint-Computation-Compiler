@@ -12,7 +12,7 @@ CXXFLAGS := -g -O0 `$(LLVM_CONFIG) --cxxflags --ldflags --system-libs --libs all
 
 lexer: $(OBJ_DIR)/lexer.o
 
-parser: $(OBJ_DIR)/parser
+parser: $(OBJ_DIR)/parser.o
 
 $(OBJ_DIR)/lexer.o: lexer/lexer.cpp lexer/lexer.h
 	@mkdir -p $(OBJ_DIR)
