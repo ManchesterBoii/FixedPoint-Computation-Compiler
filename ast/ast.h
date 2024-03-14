@@ -128,3 +128,6 @@ public:
 };
 
 std::unique_ptr<AST> LogError(const char *Str);
+
+void kprintf_val(Module *mod, BasicBlock *bb, Value* val);
+void kprintf_str(Module *mod, BasicBlock *bb, const std::string& to_print);

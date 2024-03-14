@@ -164,8 +164,9 @@ std::unique_ptr<FPnt> ProgramAST::propagateIntervals() {
 Value *BinOpExpr::codegen(Function* F) {
     Value *L = left->codegen(F);
     Value *R = right->codegen(F);
-    if (!L || !R)
+    if (!L || !R) {
         return nullptr;
+    }
 
     int resultBitWidth = calcNumBits(
         floatingPointNotation->lowerBound, 
@@ -180,6 +181,7 @@ Value *BinOpExpr::codegen(Function* F) {
 
     switch (op) {
     case '+':
+        std::cout << "add" << std::endl;
         return Builder->CreateAdd(L, R);
     case '*':
         return Builder->CreateMul(L, R);
@@ -195,7 +197,12 @@ Value *ProgramAST::codegen(Function* F) {
     Value *stmtRes;
     for (auto &Stmt : Stmts) {
         stmtRes = Stmt->codegen(F);
+        BasicBlock *bb = Builder->GetInsertBlock();
+        Module *m = TheModule.get();
+        kprintf_val(m, bb, stmtRes);
+        kprintf_str(m, bb, "asdf\n");
     }
+    TheModule->print(errs(), nullptr);
     return stmtRes;
 }
 
@@ -248,4 +255,49 @@ Value* NumExpr::codegen(llvm::Function* F) {
     llvm::Constant* constVal = llvm::ConstantInt::get(intType, scaledValue);
 
     return constVal;
+}
+
+void kprintf_val(Module *mod, BasicBlock *bb, Value* val) {
+  Function *func_printf = mod->getFunction("printf");
+  if (!func_printf) {
+    PointerType::get(IntegerType::get(mod->getContext(), 8), 0);
+    FunctionType *FuncTy9 = FunctionType::get(IntegerType::get(mod->getContext(), 32), true);
+
+    func_printf = Function::Create(FuncTy9, GlobalValue::ExternalLinkage, "printf", mod);
+    func_printf->setCallingConv(CallingConv::C);
+  }
+
+  IRBuilder <> builder(*TheContext);
+  builder.SetInsertPoint(bb);
+
+
+  Value *str = builder.CreateGlobalStringPtr("%d");
+
+  std::vector <Value *> int32_call_params;
+  int32_call_params.push_back(str);
+  int32_call_params.push_back(val);
+
+  CallInst::Create(func_printf, int32_call_params, "call", bb);
+}
+
+void kprintf_str(Module *mod, BasicBlock *bb, const std::string& to_print) {
+  Function *func_printf = mod->getFunction("printf");
+  if (!func_printf) {
+    PointerType::get(IntegerType::get(mod->getContext(), 8), 0);
+    FunctionType *FuncTy9 = FunctionType::get(IntegerType::get(mod->getContext(), 32), true);
+
+    func_printf = Function::Create(FuncTy9, GlobalValue::ExternalLinkage, "printf", mod);
+    func_printf->setCallingConv(CallingConv::C);
+  }
+
+  IRBuilder <> builder(*TheContext);
+  builder.SetInsertPoint(bb);
+
+
+  Value *str = builder.CreateGlobalStringPtr(to_print);
+
+  std::vector <Value *> int32_call_params;
+  int32_call_params.push_back(str);
+
+  CallInst::Create(func_printf, int32_call_params, "call", bb);
 }
