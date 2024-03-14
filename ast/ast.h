@@ -33,7 +33,12 @@ static std::map<std::string, Value *> NamedValues;
 
 
 class AST {
+protected: 
+    std::unique_ptr<FPnt> floatingPointNotation;
+
 public: 
+    AST(std::unique_ptr<FPnt> fpnt = nullptr) : floatingPointNotation(std::move(fpnt)) {}
+
     virtual ~AST() = default;
     virtual void print(int depth = 0) = 0;
 
@@ -88,8 +93,8 @@ class FPnt {
 public:
     double lowerBound;
     double upperBound;
-    double precision;
-    FPnt(double lb, double ub, double prec);
+    int decimalBits;
+    FPnt(double lb, double ub, int decimalBits);
 
     void print(int depth = 0);
 
@@ -99,7 +104,6 @@ public:
 class Definition : public AST {
 public:
     std::string name;
-    std::unique_ptr<FPnt> floatingPointNotation; 
     std::unique_ptr<AST> expression;
     Definition(const std::string& n, std::unique_ptr<FPnt> fpnt, std::unique_ptr<AST> expr);
     Definition(const std::string& n, std::unique_ptr<AST> expr);
