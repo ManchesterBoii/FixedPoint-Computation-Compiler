@@ -20,6 +20,22 @@ std::unique_ptr<ProgramAST> Parser::ParseProgram() {
             NextToken();
         }
     }
+
+    // Print interval table for debugging purposes
+    // std::cout << "TABLE:" << std::endl;
+
+    // for (const auto& pair : GetIntervalTable()) {
+    //     std::cout << "Key: " << pair.first << " - Value: ";
+    //     if (pair.second) {
+    //         pair.second->print();
+    //     } else {
+    //         std::cout << "Nullptr" << std::endl;
+    //     }
+    //     std::cout << std::endl;
+    // }
+
+    Program->propagateIntervals();
+
     return Program;
 }
 
@@ -31,9 +47,9 @@ std::unique_ptr<Definition> Parser::ParseDefinition() {
     std::string Name = IdentifierStr;
     NextToken(); 
 
-    std::unique_ptr<FPnt> FPnt = nullptr;
+    std::unique_ptr<FPnt> defFPnt = nullptr;
     if (CurrentToken == tok_in) {
-        FPnt = ParseFloatingPointNotation(); 
+        defFPnt = ParseFloatingPointNotation(); 
     }
 
     if (CurrentToken != '=') throw std::runtime_error("Expected '=' in definition");
@@ -41,8 +57,9 @@ std::unique_ptr<Definition> Parser::ParseDefinition() {
 
     auto Expr = ParseExpression(); 
 
-    if (FPnt) {
-        return std::make_unique<Definition>(Name, std::move(FPnt), std::move(Expr));
+    if (defFPnt) {
+        GetIntervalTable().emplace(Name, std::make_unique<FPnt>(*defFPnt));
+        return std::make_unique<Definition>(Name, std::move(defFPnt), std::move(Expr));
     } else {
         return std::make_unique<Definition>(Name, std::move(Expr));
     }

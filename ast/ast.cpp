@@ -1,4 +1,11 @@
+#include <algorithm>
+
 #include "ast.h"
+
+std::map<std::string, std::unique_ptr<FPnt>>& GetIntervalTable() {
+    static std::map<std::string, std::unique_ptr<FPnt>> intervalTable;
+    return intervalTable;
+}
 
 NumExpr::NumExpr(double value) : value(value) {}
 
@@ -62,4 +69,71 @@ void ProgramAST::print(int depth) {
 void FPnt::print(int depth) {
     std::string indent(depth * 4, ' ');
     std::cout << indent << "([" << lowerBound << ", " << upperBound << "], " << precision << ")";
+}
+
+std::unique_ptr<FPnt> NumExpr::propagateIntervals() {
+    return std::make_unique<FPnt>(FPnt(value, value, 0));
+}
+
+std::unique_ptr<FPnt> NameExpr::propagateIntervals() {    
+    auto it = GetIntervalTable().find(name);
+    if (it != GetIntervalTable().end() && it->second) {
+        return std::make_unique<FPnt>(*(it->second));
+    } else {
+        return nullptr;
+    }
+}
+
+std::unique_ptr<FPnt> BinOpExpr::propagateIntervals() {
+    auto leftInterval = left->propagateIntervals();
+    if (!leftInterval) {
+        std::cerr << "left interval null" << std::endl;
+        return nullptr;
+    }
+    auto rightInterval = right->propagateIntervals();
+    if (!leftInterval) {
+        std::cerr << "right interval null" << std::endl;
+        return nullptr;
+    }
+    double lowerBound, upperBound, precision;
+    if (op == '+') {
+        lowerBound = leftInterval->lowerBound + rightInterval->lowerBound;
+        upperBound = leftInterval->upperBound + rightInterval->upperBound;
+        precision = std::max(leftInterval->precision, rightInterval->precision);
+    } else if (op == '*') {
+        double p1 = leftInterval->lowerBound * rightInterval->lowerBound;
+        double p2 = leftInterval->lowerBound * rightInterval->upperBound;
+        double p3 = leftInterval->upperBound * rightInterval->lowerBound;
+        double p4 = leftInterval->upperBound * rightInterval->upperBound;
+
+        lowerBound = std::min({p1, p2, p3, p4});
+        upperBound = std::max({p1, p2, p3, p4});
+
+        precision = std::max(leftInterval->precision, rightInterval->precision);
+    }
+
+    return std::make_unique<FPnt>(FPnt(lowerBound, upperBound, precision));
+}
+
+std::unique_ptr<FPnt> Definition::propagateIntervals() {
+    if (floatingPointNotation) {
+        return std::make_unique<FPnt>(*floatingPointNotation);
+    }
+
+    // For now, prioritize the Expression's interval over user input.
+    // might make sense to modify this logic later
+
+    auto exprFPnt = expression->propagateIntervals();
+    if (exprFPnt) {
+        floatingPointNotation = std::make_unique<FPnt>(*exprFPnt);
+        GetIntervalTable()[name] = std::make_unique<FPnt>(*exprFPnt);
+    }
+    return exprFPnt ? std::make_unique<FPnt>(*exprFPnt) : nullptr;
+}
+
+std::unique_ptr<FPnt> ProgramAST::propagateIntervals() {
+    for (auto &stmt : Stmts) {
+        stmt->propagateIntervals();
+    }
+    return nullptr;
 }

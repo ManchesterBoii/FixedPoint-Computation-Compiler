@@ -2,11 +2,18 @@
 #include <vector>
 #include <memory>
 #include <iostream>
+#include <map>
+
+class FPnt;
+
+std::map<std::string, std::unique_ptr<FPnt>>& GetIntervalTable();
 
 class AST {
 public: 
     virtual ~AST() = default;
     virtual void print(int depth = 0) = 0;
+
+    virtual std::unique_ptr<FPnt> propagateIntervals() = 0;
 };
 
 class Expr: public AST {
@@ -19,6 +26,7 @@ public:
     double value;
     NumExpr(double value);
 
+    std::unique_ptr<FPnt> propagateIntervals() override;
     void print(int depth = 0) override;
 };
 
@@ -27,6 +35,7 @@ public:
     std::string name;
     NameExpr(const std::string& name);
 
+    std::unique_ptr<FPnt> propagateIntervals() override;
     void print(int depth = 0) override;
 };
 
@@ -37,6 +46,7 @@ public:
     char op; 
     BinOpExpr(std::unique_ptr<Expr> lhs, std::unique_ptr<Expr> rhs, char o);
 
+    std::unique_ptr<FPnt> propagateIntervals() override;
     void print(int depth = 0) override;
 };
 
@@ -58,12 +68,16 @@ public:
     Definition(const std::string& n, std::unique_ptr<FPnt> fpnt, std::unique_ptr<Expr> expr);
     Definition(const std::string& n, std::unique_ptr<Expr> expr);
 
+    std::unique_ptr<FPnt> propagateIntervals() override;
+
     void print(int depth = 0) override;
 };
 
 class ProgramAST : public AST {
 public:
     std::vector<std::unique_ptr<Definition>> Stmts;
+
+    std::unique_ptr<FPnt> propagateIntervals() override;
 
     void print(int depth = 0) override;
 };
