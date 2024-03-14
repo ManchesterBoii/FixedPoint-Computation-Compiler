@@ -92,14 +92,14 @@ std::unique_ptr<FPnt> Parser::ParseFloatingPointNotation() {
     if (CurrentToken != ',') throw std::runtime_error("Expected ',' after ']'");
     NextToken(); // ','
 
-    if (CurrentToken != tok_number) throw std::runtime_error("Expected precision number");
-    double precision = NumVal;
+    if (CurrentToken != tok_number) throw std::runtime_error("Expected number for decimal bits");
+    int decimalBits = NumVal;
     NextToken(); // 
 
-    if (CurrentToken != ')') throw std::runtime_error("Expected ')' after precision");
+    if (CurrentToken != ')') throw std::runtime_error("Expected ')' after decimal bit number");
     NextToken(); // ')'
 
-    return std::make_unique<FPnt>(lowerBound, upperBound, precision);
+    return std::make_unique<FPnt>(lowerBound, upperBound, decimalBits);
 }
 
 

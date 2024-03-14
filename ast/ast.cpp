@@ -19,28 +19,42 @@ NameExpr::NameExpr(const std::string& name) : name(name) {}
 BinOpExpr::BinOpExpr(std::unique_ptr<AST> lhs, std::unique_ptr<AST> rhs, char o)
     : left(std::move(lhs)), right(std::move(rhs)), op(o) {}
 
-FPnt::FPnt(double lb, double ub, double prec) 
-    : lowerBound(lb), upperBound(ub), precision(prec) {}
+FPnt::FPnt(double lb, double ub, int decimalBits) 
+    : lowerBound(lb), upperBound(ub), decimalBits(decimalBits) {}
 
 Definition::Definition(const std::string& n, std::unique_ptr<FPnt> fpnt, std::unique_ptr<AST> expr)
-    : name(n), floatingPointNotation(std::move(fpnt)), expression(std::move(expr)) {}
+    : AST(std::move(fpnt)), name(n), expression(std::move(expr)) {}
 
 Definition::Definition(const std::string& n, std::unique_ptr<AST> expr)
-    : name(n), floatingPointNotation(nullptr), expression(std::move(expr)) {}
+    : AST(nullptr), name(n), expression(std::move(expr)) {}
 
 void NumExpr::print(int depth) {
     std::string indent(depth * 4, ' ');
-    std::cout << indent << "NumExpr(" << value << ")";
+    std::cout << indent << "NumExpr(" << value;
+    if (floatingPointNotation) {
+        std::cout << ",\n";
+        floatingPointNotation->print(depth + 1);
+    } 
+    std::cout << "\n" << indent << ")";
 }
 
 void NameExpr::print(int depth) {
     std::string indent(depth * 4, ' ');
-    std::cout << indent << "NameExpr(" << name << ")";
+    std::cout << indent << "NameExpr(" << name;
+    if (floatingPointNotation) {
+        std::cout << ",\n";
+        floatingPointNotation->print(depth + 1);
+    } 
+    std::cout << "\n" << indent << ")";
 }
 
 void BinOpExpr::print(int depth) {
     std::string indent(depth * 4, ' ');
     std::cout << indent << "BinOpExpr(" << op << ",\n";
+    if (floatingPointNotation) {
+        floatingPointNotation->print(depth + 1);
+        std::cout << ",\n";
+    }
     left->print(depth + 1);
     std::cout << ",\n";
     right->print(depth + 1);
@@ -73,16 +87,18 @@ void ProgramAST::print(int depth) {
 
 void FPnt::print(int depth) {
     std::string indent(depth * 4, ' ');
-    std::cout << indent << "([" << lowerBound << ", " << upperBound << "], " << precision << ")";
+    std::cout << indent << "([" << lowerBound << ", " << upperBound << "], " << decimalBits << ")";
 }
 
 std::unique_ptr<FPnt> NumExpr::propagateIntervals() {
+    floatingPointNotation = std::make_unique<FPnt>(FPnt(value, value, 0));
     return std::make_unique<FPnt>(FPnt(value, value, 0));
 }
 
 std::unique_ptr<FPnt> NameExpr::propagateIntervals() {    
     auto it = GetIntervalTable().find(name);
     if (it != GetIntervalTable().end() && it->second) {
+        floatingPointNotation = std::make_unique<FPnt>(*(it->second));
         return std::make_unique<FPnt>(*(it->second));
     } else {
         return nullptr;
@@ -100,11 +116,12 @@ std::unique_ptr<FPnt> BinOpExpr::propagateIntervals() {
         std::cerr << "right interval null" << std::endl;
         return nullptr;
     }
-    double lowerBound, upperBound, precision;
+    double lowerBound, upperBound;
+    int decimalBits;
     if (op == '+') {
         lowerBound = leftInterval->lowerBound + rightInterval->lowerBound;
         upperBound = leftInterval->upperBound + rightInterval->upperBound;
-        precision = std::max(leftInterval->precision, rightInterval->precision);
+        decimalBits = std::max(leftInterval->decimalBits, rightInterval->decimalBits);
     } else if (op == '*') {
         double p1 = leftInterval->lowerBound * rightInterval->lowerBound;
         double p2 = leftInterval->lowerBound * rightInterval->upperBound;
@@ -114,14 +131,16 @@ std::unique_ptr<FPnt> BinOpExpr::propagateIntervals() {
         lowerBound = std::min({p1, p2, p3, p4});
         upperBound = std::max({p1, p2, p3, p4});
 
-        precision = std::max(leftInterval->precision, rightInterval->precision);
+        decimalBits = std::max(leftInterval->decimalBits, rightInterval->decimalBits);
     }
 
-    return std::make_unique<FPnt>(FPnt(lowerBound, upperBound, precision));
+    floatingPointNotation = std::make_unique<FPnt>(FPnt(lowerBound, upperBound, decimalBits));
+    return std::make_unique<FPnt>(FPnt(lowerBound, upperBound, decimalBits));
 }
 
 std::unique_ptr<FPnt> Definition::propagateIntervals() {
     if (floatingPointNotation) {
+        expression->propagateIntervals();
         return std::make_unique<FPnt>(*floatingPointNotation);
     }
 
