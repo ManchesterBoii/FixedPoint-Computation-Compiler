@@ -1,10 +1,6 @@
 #include "utils.h"
 
 int calcNumBits(double lowerBound, double upperBound, int decimalBits) {
-    if (lowerBound > upperBound) {
-        throw std::invalid_argument("Lower bound should be less than or equal to upper bound.");
-    }
-
     double maxAbsValue = std::max(std::abs(lowerBound), std::abs(upperBound));
     int bits = std::ceil(std::log2(maxAbsValue + 1)); 
 

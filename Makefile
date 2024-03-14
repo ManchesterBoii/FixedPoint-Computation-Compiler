@@ -26,6 +26,10 @@ $(OBJ_DIR)/ast.o: ast/ast.cpp ast/ast.h
 	@mkdir -p $(OBJ_DIR)
 	$(CXX) $(CXXFLAGS) -c ast/ast.cpp -o $(OBJ_DIR)/ast.o
 
+$(OBJ_DIR)/compiler.o: compiler.cpp
+	@mkdir -p $(OBJ_DIR)
+	$(CXX) $(CXXFLAGS) -c compiler.cpp -o $(OBJ_DIR)/compiler.o
+
 lexertest: $(OBJ_DIR)/lexer.o lexer/lexertest.cpp
 	@mkdir -p $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) $(OBJ_DIR)/lexer.o lexer/lexertest.cpp -o $(BIN_DIR)/lexertest
@@ -37,6 +41,9 @@ parsertest: $(OBJ_DIR)/lexer.o $(OBJ_DIR)/ast.o $(OBJ_DIR)/parser.o parser/parse
 	$(CXX) $(CXXFLAGS) $(OBJ_DIR)/lexer.o $(OBJ_DIR)/ast.o $(OBJ_DIR)/parser.o parser/parsertest.cpp -o $(BIN_DIR)/parsertest
 	./$(BIN_DIR)/parsertest < $(PROGRAM_DIR)/fpc_program_1.fpc
 
+compiler: $(OBJ_DIR)/compiler.o $(OBJ_DIR)/lexer.o $(OBJ_DIR)/ast.o $(OBJ_DIR)/parser.o compiler.cpp
+	$(CXX) $(CXXFLAGS) $(OBJ_DIR)/compiler.o $(OBJ_DIR)/lexer.o $(OBJ_DIR)/ast.o $(OBJ_DIR)/parser.o compiler.cpp -o $(BIN_DIR)/compiler
+	./$(BIN_DIR)/compiler < $(PROGRAM_DIR)/fpc_program_1.fpc
 
 clean:
 	rm -f $(BIN_DIR)/lexer $(BIN_DIR)/lexertest $(OBJ_DIR)/*.o
