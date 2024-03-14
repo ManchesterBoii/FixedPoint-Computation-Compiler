@@ -26,11 +26,10 @@ std::map<std::string, std::unique_ptr<FPnt>>& GetIntervalTable();
 
 using namespace llvm;
 
-static std::unique_ptr<LLVMContext> TheContext;
-static std::unique_ptr<Module> TheModule;
-static std::unique_ptr<IRBuilder<>> Builder;
+extern std::unique_ptr<LLVMContext> TheContext;
+extern std::unique_ptr<Module> TheModule;
+extern std::unique_ptr<IRBuilder<>> Builder;
 static std::map<std::string, Value *> NamedValues;
-
 
 class AST {
 protected: 

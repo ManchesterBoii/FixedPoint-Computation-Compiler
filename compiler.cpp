@@ -17,17 +17,30 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <iostream>
+
+#include "parser/parser.h"
 
 using namespace llvm;
-using namespace std;
+
+std::unique_ptr<LLVMContext> TheContext;
+std::unique_ptr<Module> TheModule;
+std::unique_ptr<IRBuilder<>> Builder;
+
+static void InitializeModule() {
+  // Open a new context and module.
+  TheContext = std::make_unique<LLVMContext>();
+  TheModule = std::make_unique<Module>("Fixed Point Compiler", *TheContext);
+
+  // Create a new builder for the module.
+  Builder = std::make_unique<IRBuilder<>>(*TheContext);
+}
 
 int main() {
-    //Parser parser;
-    //std::unique_ptr<ProgramAST> ast = parser.ParseProgram();
-    //ast->print();
+    Parser parser;
+    std::unique_ptr<ProgramAST> ast = parser.ParseProgram();
+    ast->print();
 
-    TheModule = llvm::make_unique<llvm::Module>("Fixed Point Compiler", TheContext);
+    InitializeModule();
 
     // call codegen
 

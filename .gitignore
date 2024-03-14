@@ -42,3 +42,5 @@ llvm-project
 
 *.testabi
 toy
+
+dSYM
