@@ -6,7 +6,9 @@ PROGRAM_DIR := fpc_programs
 RESULT_DIR := expected_results
 OBJ_DIR := obj
 
-CXXFLAGS := -g -O0 `$(LLVM_CONFIG) --cxxflags --ldflags --system-libs --libs all` -std=c++17
+PREFLAGS := -g -O3
+LLVMFLAGS := `llvm-config --cxxflags --ldflags --system-libs --libs core`
+CXXFLAGS := -g -O0 `$(LLVM_CONFIG) --cxxflags --ldflags --system-libs --libs core` -std=c++17
 
 .PHONY: lexer lexertest clean
 
@@ -42,8 +44,11 @@ parsertest: $(OBJ_DIR)/lexer.o $(OBJ_DIR)/ast.o $(OBJ_DIR)/parser.o parser/parse
 	./$(BIN_DIR)/parsertest < $(PROGRAM_DIR)/fpc_program_1.fpc
 
 compiler: $(OBJ_DIR)/compiler.o $(OBJ_DIR)/lexer.o $(OBJ_DIR)/ast.o $(OBJ_DIR)/parser.o compiler.cpp
-	$(CXX) $(CXXFLAGS) $(OBJ_DIR)/compiler.o $(OBJ_DIR)/lexer.o $(OBJ_DIR)/ast.o $(OBJ_DIR)/parser.o compiler.cpp -o $(BIN_DIR)/compiler
+	$(CXX) $(PREFLAGS) $(OBJ_DIR)/compiler.o $(OBJ_DIR)/lexer.o $(OBJ_DIR)/ast.o $(OBJ_DIR)/parser.o compiler.cpp $(LLVMFLAGS) -o $(BIN_DIR)/compiler
 	./$(BIN_DIR)/compiler < $(PROGRAM_DIR)/fpc_program_1.fpc
 
 clean:
 	rm -f $(BIN_DIR)/lexer $(BIN_DIR)/lexertest $(OBJ_DIR)/*.o
+
+compiler2:
+	clang++ -g -O3 compiler.cpp `llvm-config --cxxflags --ldflags --system-libs --libs core` -o compiler

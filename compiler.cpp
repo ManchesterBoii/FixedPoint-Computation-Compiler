@@ -19,15 +19,13 @@
 #include <vector>
 #include <iostream>
 
-#include "parser/parser.h"
-
 using namespace llvm;
 using namespace std;
 
 int main() {
-    Parser parser;
-    std::unique_ptr<ProgramAST> ast = parser.ParseProgram();
-    ast->print();
+    //Parser parser;
+    //std::unique_ptr<ProgramAST> ast = parser.ParseProgram();
+    //ast->print();
 
     TheModule = llvm::make_unique<llvm::Module>("Fixed Point Compiler", TheContext);
 
