@@ -243,7 +243,7 @@ llvm::Value* NumExpr::codegen(llvm::Function* F) {
             throw std::runtime_error("Unsupported bit width");
     }
 
-    uint64_t scaledValue = static_cast<uint64_t>(value * std::pow(2, floatingPointNotation->decimalBits));
+    uint64_t scaledValue = static_cast<uint64_t>(value << floatingPointNotation->decimalBits);
 
 
     llvm::Constant* constVal = llvm::ConstantInt::get(intType, scaledValue);
